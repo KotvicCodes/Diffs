@@ -23,8 +23,7 @@ function edit() {
   $('editors').hidden = false;
   $('comparison').hidden = true;
   $('edit').hidden = true;
-  $('step-number').textContent = '01';
-  $('view-title').textContent = 'Your two versions';
+  $('view-title').textContent = 'Files';
   $('compare').firstChild.textContent = 'Compare texts ';
   $('change-count').hidden = true;
   result = null;
@@ -91,16 +90,15 @@ function renderComparison() {
     $('editors').hidden = true;
     $('comparison').hidden = false;
     $('edit').hidden = false;
-    $('step-number').textContent = '02';
-    $('view-title').textContent = 'The comparison';
+    $('view-title').textContent = 'Comparison';
     $('compare').firstChild.textContent = 'Compare again ';
     $('result-lines').textContent = `${next.rows.length.toLocaleString()} aligned rows`;
     $('change-count').hidden = false;
     $('change-count').textContent = `+${next.added} added  /  −${next.removed} removed`;
     $('change-count').classList.toggle('is-identical', next.identical);
     message(next.identical
-      ? $('ignore-whitespace').checked ? 'The texts match when ignoring whitespace.' : 'The texts are identical.'
-      : 'Comparison ready. Changes are highlighted below each file name.');
+      ? $('ignore-whitespace').checked ? 'Identical (ignoring whitespace).' : 'Identical.'
+      : '');
     result = next;
     $('diff-scroll').scrollTop = 0;
   } catch (error) {
@@ -123,7 +121,7 @@ async function loadFile(side, file) {
     $(`${side}-text`).value = normalize(text);
     names[side] = file.name;
     updateMeta(side);
-    message(`Loaded ${file.name}. Ready to compare.`);
+    message('');
   } catch (error) {
     if (loadVersion[side] === version) message(error.message, true);
   }
@@ -136,7 +134,7 @@ for (const side of sides) {
   $(`${side}-text`).addEventListener('input', () => {
     loadVersion[side]++;
     updateMeta(side);
-    message('Ready to compare.');
+    message('');
   });
   const panel = document.querySelector(`[data-side="${side}"]`);
   panel.addEventListener('dragover', (event) => {
@@ -157,7 +155,7 @@ for (const side of sides) {
 }
 
 $('compare').addEventListener('click', renderComparison);
-$('edit').addEventListener('click', () => { edit(); $('left-text').focus(); message('Edit either version, then compare again.'); });
+$('edit').addEventListener('click', () => { edit(); $('left-text').focus(); message(''); });
 $('ignore-whitespace').addEventListener('change', () => { if (result) renderComparison(); });
 $('wrap').addEventListener('change', () => document.querySelector('.workspace').classList.toggle('no-wrap', !$('wrap').checked));
 $('swap').addEventListener('click', () => {
@@ -166,7 +164,7 @@ $('swap').addEventListener('click', () => {
   [names.left, names.right] = [names.right, names.left];
   sides.forEach(updateMeta);
   if (result) renderComparison();
-  else message('Versions swapped.');
+  else message('');
 });
 $('clear').addEventListener('click', () => {
   edit();
@@ -177,13 +175,13 @@ $('clear').addEventListener('click', () => {
     updateMeta(side);
   }
   $('diff-rows').replaceChildren();
-  message('Ready when you are. Add two files or paste some text.');
+  message('');
   $('left-text').focus();
 });
 $('sample').addEventListener('click', () => {
   for (const side of sides) loadVersion[side]++;
-  $('left-text').value = '{\n  "name": "a small idea",\n  "version": "1.0.0",\n  "private": false,\n  "features": [\n    "compare text",\n    "upload files"\n  ]\n}\n';
-  $('right-text').value = '{\n  "name": "a little clarity",\n  "version": "1.1.0",\n  "private": true,\n  "features": [\n    "compare text",\n    "open local files",\n    "keep things simple"\n  ]\n}\n';
+  $('left-text').value = '{\n  "name": "project",\n  "version": "1.0.0",\n  "private": false,\n  "features": [\n    "compare text",\n    "upload files"\n  ]\n}\n';
+  $('right-text').value = '{\n  "name": "project",\n  "version": "1.1.0",\n  "private": true,\n  "features": [\n    "compare text",\n    "open local files",\n    "ignore whitespace"\n  ]\n}\n';
   names.left = 'before.json';
   names.right = 'after.json';
   sides.forEach(updateMeta);
