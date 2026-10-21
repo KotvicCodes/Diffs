@@ -27,12 +27,12 @@ export function validateText(text) {
 }
 
 // Keep the displayed text intact when matching whitespace-insensitive lines.
-export function compareTexts(original, changed, { ignoreWhitespace = false } = {}) {
+export function compareTexts(original, changed, { ignoreWhitespace = false, timeout = 1500 } = {}) {
   validateText(original);
   validateText(changed);
   const left = normalize(original);
   const right = normalize(changed);
-  const parts = diffLines(left, right, { ignoreWhitespace, timeout: 1500 });
+  const parts = diffLines(left, right, { ignoreWhitespace, timeout });
   if (!parts) throw new Error('These files are too different to compare quickly. Try smaller sections.');
   const leftLines = splitLines(left);
   const rightLines = splitLines(right);
