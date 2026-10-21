@@ -25,19 +25,19 @@
 
           <div id="editors" class="editors">
             <section class="editor-panel" data-side="left" aria-label="Original version">
-              <div class="panel-header"><div class="file-heading"><span class="file-dot original-dot"></span><span class="panel-label">Original</span><span id="left-name" class="file-name" title="Pasted text">Pasted text</span></div><button class="file-button" data-open="left">Open file <span aria-hidden="true">↑</span></button><input type="file" id="left-file" hidden aria-label="Open original file" /></div>
+              <div class="panel-header"><div class="file-heading"><span class="file-dot original-dot"></span><span class="panel-label">Original</span><span id="left-name" class="file-name" title="Pasted text">Pasted text</span></div><div class="file-actions"><button class="copy-button" data-copy="left" aria-label="Copy original text">Copy</button><button class="file-button" data-open="left">Open file <span aria-hidden="true">↑</span></button></div><input type="file" id="left-file" hidden aria-label="Open original file" /></div>
               <label class="sr-only" for="left-text">Original text</label><textarea id="left-text" spellcheck="false" placeholder="Paste text or drop a file"></textarea>
               <div class="panel-footer"><span id="left-meta">0 lines · 0 characters</span></div>
             </section>
             <section class="editor-panel" data-side="right" aria-label="Changed version">
-              <div class="panel-header"><div class="file-heading"><span class="file-dot changed-dot"></span><span class="panel-label">Changed</span><span id="right-name" class="file-name" title="Pasted text">Pasted text</span></div><button class="file-button" data-open="right">Open file <span aria-hidden="true">↑</span></button><input type="file" id="right-file" hidden aria-label="Open changed file" /></div>
+              <div class="panel-header"><div class="file-heading"><span class="file-dot changed-dot"></span><span class="panel-label">Changed</span><span id="right-name" class="file-name" title="Pasted text">Pasted text</span></div><div class="file-actions"><button class="copy-button" data-copy="right" aria-label="Copy changed text">Copy</button><button class="file-button" data-open="right">Open file <span aria-hidden="true">↑</span></button></div><input type="file" id="right-file" hidden aria-label="Open changed file" /></div>
               <label class="sr-only" for="right-text">Changed text</label><textarea id="right-text" spellcheck="false" placeholder="Paste text or drop a file"></textarea>
               <div class="panel-footer"><span id="right-meta">0 lines · 0 characters</span></div>
             </section>
           </div>
 
           <section id="comparison" aria-label="File comparison" hidden>
-            <div class="result-headers"><div><span class="file-dot original-dot"></span><strong>Original</strong><span id="result-left-name" class="file-name"></span></div><div><span class="file-dot changed-dot"></span><strong>Changed</strong><span id="result-right-name" class="file-name"></span></div></div>
+            <div class="result-headers"><div><div class="file-heading"><span class="file-dot original-dot"></span><strong>Original</strong><span id="result-left-name" class="file-name"></span></div><button class="copy-button" data-copy="left" aria-label="Copy original text">Copy</button></div><div><div class="file-heading"><span class="file-dot changed-dot"></span><strong>Changed</strong><span id="result-right-name" class="file-name"></span></div><button class="copy-button" data-copy="right" aria-label="Copy changed text">Copy</button></div></div>
             <div id="diff-scroll" class="diff-scroll" tabindex="0" role="region" aria-label="Side-by-side differences"><div id="diff-rows" class="diff-rows"></div></div>
             <div class="result-footer"><span><span class="legend removed-legend">− Removed</span><span class="legend added-legend">+ Added</span></span><span id="result-lines"></span></div>
           </section>

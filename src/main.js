@@ -12,6 +12,50 @@ function message(text, error = false) {
   $('message').classList.toggle('error', error);
 }
 
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return;
+  } catch {
+    // Support browsers that restrict Clipboard API access to local HTML files.
+  }
+  const focused = document.activeElement;
+  const buffer = document.createElement('textarea');
+  buffer.className = 'clipboard-buffer';
+  buffer.value = text;
+  buffer.readOnly = true;
+  document.body.append(buffer);
+  try {
+    buffer.select();
+    if (!document.execCommand('copy')) throw new Error('Clipboard unavailable');
+  } finally {
+    buffer.remove();
+    focused?.focus({ preventScroll: true });
+  }
+}
+
+for (const button of document.querySelectorAll('[data-copy]')) {
+  const label = button.getAttribute('aria-label');
+  let resetTimer;
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    try {
+      await copyText($(`${button.dataset.copy}-text`).value);
+      clearTimeout(resetTimer);
+      button.textContent = 'Copied';
+      button.setAttribute('aria-label', label.replace('Copy', 'Copied'));
+      resetTimer = setTimeout(() => {
+        button.textContent = 'Copy';
+        button.setAttribute('aria-label', label);
+      }, 1500);
+    } catch {
+      message('Could not copy. Select the text and copy it manually.', true);
+    } finally {
+      button.disabled = false;
+    }
+  });
+}
+
 function updateMeta(side) {
   const text = $(`${side}-text`).value;
   $(`${side}-meta`).textContent = `${splitLines(text).length.toLocaleString()} lines · ${text.length.toLocaleString()} characters`;

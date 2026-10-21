@@ -27,7 +27,7 @@ Open **`dist/index.html`** directly in your browser. The build bundles everythin
 2. Select **Compare texts** (or press **⌘ Enter** on macOS / **Ctrl Enter** elsewhere).
 3. Red marks removed lines; green marks added lines. Stronger highlights show changes within a replaced line.
 
-Use **Edit texts** to revise the inputs, **Swap** to reverse the comparison, or **Clear** to start over. **Ignore whitespace** ignores leading/trailing whitespace when matching lines. **Wrap lines** controls wrapping in the editors and comparison.
+Use **Copy** in either version's header to copy its full text, in both the editor and comparison views. Use **Edit texts** to revise the inputs, **Swap** to reverse the comparison, or **Clear** to start over. **Ignore whitespace** ignores leading/trailing whitespace when matching lines. **Wrap lines** controls wrapping in the editors and comparison.
 
 ## Privacy and limits
 
