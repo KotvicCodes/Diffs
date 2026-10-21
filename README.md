@@ -1,6 +1,6 @@
 # Diffs
 
-A small, local-first app for comparing two text files. Open files or paste text, then see additions, removals, and changes side by side.
+A small, local-first app for comparing two text files. Edit either version and see additions, removals, and changes side by side as you type.
 
 ## Run locally
 
@@ -24,10 +24,10 @@ Open **`dist/index.html`** directly in your browser. The build bundles everythin
 ## Compare files
 
 1. Use **Open file** in each panel, drop one file into each panel, or paste text.
-2. Select **Compare texts** (or press **⌘ Enter** on macOS / **Ctrl Enter** elsewhere).
-3. Red marks removed lines; green marks added lines. Stronger highlights show changes within a replaced line.
+2. Edit either pane. Differences update automatically after a short pause in typing.
+3. Red marks removed lines; green marks added lines. Stronger highlights show changes within a replaced line. Both panes stay editable, with line numbers, undo/redo, search, and aligned unchanged lines.
 
-Use **Copy** in either version's header to copy its full text, in both the editor and comparison views. Use **Edit texts** to revise the inputs, **Swap** to reverse the comparison, or **Clear** to start over. **Ignore whitespace** ignores leading/trailing whitespace when matching lines. **Wrap lines** controls wrapping in the editors and comparison.
+Use **Copy** in either version's header to copy its full text, **Swap** to reverse the comparison, or **Clear** to start over. **Ignore whitespace** ignores leading/trailing whitespace when matching lines. **Wrap lines** controls wrapping in both panes. The footer shows a missing final newline when applicable.
 
 ## Privacy and limits
 
@@ -39,7 +39,7 @@ Use **Copy** in either version's header to copy its full text, in both the edito
 
 ## Development
 
-Vanilla JavaScript, CSS, [Vite](https://vite.dev/), and [jsdiff](https://github.com/kpdecker/jsdiff). No framework or server required.
+Vanilla JavaScript, CSS, [CodeMirror](https://codemirror.net/) for editable diff panes, [Vite](https://vite.dev/), and [jsdiff](https://github.com/kpdecker/jsdiff) for line comparisons. No framework or server required.
 
 ```sh
 npm test          # Comparison correctness and input validation

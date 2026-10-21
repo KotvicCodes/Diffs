@@ -20,32 +20,23 @@
 
         <div class="workspace">
           <div class="toolbar">
-            <div class="view-label" id="view-title">Files</div>
-            <div class="toolbar-actions"><button id="edit" hidden>Edit texts</button><button id="swap" title="Swap original and changed text"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M2 5h12l-3-3M14 11H2l3 3" /></svg> Swap</button><button id="clear" class="muted-button">Clear</button></div>
+            <div class="view-label">Files</div>
+            <div class="toolbar-actions"><button id="swap" title="Swap original and changed text"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M2 5h12l-3-3M14 11H2l3 3" /></svg> Swap</button><button id="clear" class="muted-button">Clear</button></div>
           </div>
 
-          <div id="editors" class="editors">
-            <section class="editor-panel" data-side="left" aria-label="Original version">
-              <div class="panel-header"><div class="file-heading"><span class="file-dot original-dot"></span><span class="panel-label">Original</span><span id="left-name" class="file-name" title="Pasted text">Pasted text</span></div><div class="file-actions"><button class="copy-button" data-copy="left" aria-label="Copy original text">Copy</button><button class="file-button" data-open="left">Open file <span aria-hidden="true">↑</span></button></div><input type="file" id="left-file" hidden aria-label="Open original file" /></div>
-              <label class="sr-only" for="left-text">Original text</label><textarea id="left-text" spellcheck="false" placeholder="Paste text or drop a file"></textarea>
-              <div class="panel-footer"><span id="left-meta">0 lines · 0 characters</span></div>
-            </section>
-            <section class="editor-panel" data-side="right" aria-label="Changed version">
-              <div class="panel-header"><div class="file-heading"><span class="file-dot changed-dot"></span><span class="panel-label">Changed</span><span id="right-name" class="file-name" title="Pasted text">Pasted text</span></div><div class="file-actions"><button class="copy-button" data-copy="right" aria-label="Copy changed text">Copy</button><button class="file-button" data-open="right">Open file <span aria-hidden="true">↑</span></button></div><input type="file" id="right-file" hidden aria-label="Open changed file" /></div>
-              <label class="sr-only" for="right-text">Changed text</label><textarea id="right-text" spellcheck="false" placeholder="Paste text or drop a file"></textarea>
-              <div class="panel-footer"><span id="right-meta">0 lines · 0 characters</span></div>
-            </section>
+          <div class="editor-headers">
+            <div class="panel-header" data-side="left"><div class="file-heading"><span class="file-dot original-dot"></span><span class="panel-label">Original</span><span id="left-name" class="file-name" title="Pasted text">Pasted text</span></div><div class="file-actions"><button class="copy-button" data-copy="left" aria-label="Copy original text">Copy</button><button class="file-button" data-open="left">Open file <span aria-hidden="true">↑</span></button></div><input type="file" id="left-file" hidden aria-label="Open original file" /></div>
+            <div class="panel-header" data-side="right"><div class="file-heading"><span class="file-dot changed-dot"></span><span class="panel-label">Changed</span><span id="right-name" class="file-name" title="Pasted text">Pasted text</span></div><div class="file-actions"><button class="copy-button" data-copy="right" aria-label="Copy changed text">Copy</button><button class="file-button" data-open="right">Open file <span aria-hidden="true">↑</span></button></div><input type="file" id="right-file" hidden aria-label="Open changed file" /></div>
           </div>
-
-          <section id="comparison" aria-label="File comparison" hidden>
-            <div class="result-headers"><div><div class="file-heading"><span class="file-dot original-dot"></span><strong>Original</strong><span id="result-left-name" class="file-name"></span></div><button class="copy-button" data-copy="left" aria-label="Copy original text">Copy</button></div><div><div class="file-heading"><span class="file-dot changed-dot"></span><strong>Changed</strong><span id="result-right-name" class="file-name"></span></div><button class="copy-button" data-copy="right" aria-label="Copy changed text">Copy</button></div></div>
-            <div id="diff-scroll" class="diff-scroll" tabindex="0" role="region" aria-label="Side-by-side differences"><div id="diff-rows" class="diff-rows"></div></div>
-            <div class="result-footer"><span><span class="legend removed-legend">− Removed</span><span class="legend added-legend">+ Added</span></span><span id="result-lines"></span></div>
-          </section>
+          <div id="editors" aria-label="Editable file comparison"></div>
+          <div class="editor-footers">
+            <div class="panel-footer"><span id="left-meta">0 lines · 0 characters</span><span id="left-newline" hidden>No final newline</span></div>
+            <div class="panel-footer"><span id="right-meta">0 lines · 0 characters</span><span id="right-newline" hidden>No final newline</span></div>
+          </div>
 
           <div class="workspace-footer">
             <div class="options"><label><input type="checkbox" id="ignore-whitespace" />Ignore whitespace</label><label><input type="checkbox" id="wrap" checked />Wrap lines</label></div>
-            <div class="compare-action"><span class="keyboard-hint"><kbd id="shortcut">Ctrl</kbd> <kbd>↵</kbd></span><button id="compare" class="primary-button">Compare texts <span aria-hidden="true">→</span></button></div>
+            <div class="legend"><span class="removed-legend">− Removed</span><span class="added-legend">+ Added</span></div>
           </div>
         </div>
         <div class="under-workspace"><p id="message" role="status" aria-live="polite"></p><span id="change-count" hidden></span></div>
