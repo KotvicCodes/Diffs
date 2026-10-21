@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Compare two text files, privately. A simple file diff tool that works entirely in your browser." />
+    <meta name="color-scheme" content="light" />
+    <title>Diffs — a little clarity between files</title>
+  </head>
+  <body>
+    <div class="app">
+      <header class="site-header">
+        <a class="brand" href="./" aria-label="Diffs home"><span class="brand-icon" aria-hidden="true">−<br />+</span>Diffs<span class="brand-dot">.</span></a>
+        <span class="privacy"><span class="status-dot"></span>Local files. Just your browser.</span>
+      </header>
+
+      <main>
+        <div class="intro">
+          <div><p class="eyebrow">A LITTLE CLARITY BETWEEN FILES</p><h1>Spot the difference<span>.</span></h1><p class="subtitle">Two versions. Every change, in plain sight.</p></div>
+          <button id="sample" class="text-button">Try an example <svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 12 12 4M4 4h8v8" /></svg></button>
+        </div>
+
+        <div class="workspace">
+          <div class="toolbar">
+            <div class="view-label"><span class="step-number" id="step-number">01</span><span id="view-title">Your two versions</span></div>
+            <div class="toolbar-actions"><button id="edit" hidden>Edit texts</button><button id="swap" title="Swap original and changed text"><svg class="icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M2 5h12l-3-3M14 11H2l3 3" /></svg> Swap</button><button id="clear" class="muted-button">Clear</button></div>
+          </div>
+
+          <div id="editors" class="editors">
+            <section class="editor-panel" data-side="left" aria-label="Original version">
+              <div class="panel-header"><div class="file-heading"><span class="file-dot original-dot"></span><span class="panel-label">Original</span><span id="left-name" class="file-name" title="Pasted text">Pasted text</span></div><button class="file-button" data-open="left">Open file <span aria-hidden="true">↑</span></button><input type="file" id="left-file" hidden aria-label="Open original file" /></div>
+              <label class="sr-only" for="left-text">Original text</label><textarea id="left-text" spellcheck="false" placeholder="Paste original text here…&#10;&#10;Or drop a text file into this panel."></textarea>
+              <div class="panel-footer"><span id="left-meta">0 lines · 0 characters</span><span>UTF-8 text</span></div>
+            </section>
+            <section class="editor-panel" data-side="right" aria-label="Changed version">
+              <div class="panel-header"><div class="file-heading"><span class="file-dot changed-dot"></span><span class="panel-label">Changed</span><span id="right-name" class="file-name" title="Pasted text">Pasted text</span></div><button class="file-button" data-open="right">Open file <span aria-hidden="true">↑</span></button><input type="file" id="right-file" hidden aria-label="Open changed file" /></div>
+              <label class="sr-only" for="right-text">Changed text</label><textarea id="right-text" spellcheck="false" placeholder="Paste changed text here…&#10;&#10;Or drop a text file into this panel."></textarea>
+              <div class="panel-footer"><span id="right-meta">0 lines · 0 characters</span><span>UTF-8 text</span></div>
+            </section>
+          </div>
+
+          <section id="comparison" aria-label="File comparison" hidden>
+            <div class="result-headers"><div><span class="file-dot original-dot"></span><strong>Original</strong><span id="result-left-name" class="file-name"></span></div><div><span class="file-dot changed-dot"></span><strong>Changed</strong><span id="result-right-name" class="file-name"></span></div></div>
+            <div id="diff-scroll" class="diff-scroll" tabindex="0" role="region" aria-label="Side-by-side differences"><div id="diff-rows" class="diff-rows"></div></div>
+            <div class="result-footer"><span><span class="legend removed-legend">− Removed</span><span class="legend added-legend">+ Added</span></span><span id="result-lines"></span></div>
+          </section>
+
+          <div class="workspace-footer">
+            <div class="options"><label><input type="checkbox" id="ignore-whitespace" />Ignore whitespace</label><label><input type="checkbox" id="wrap" checked />Wrap lines</label></div>
+            <div class="compare-action"><span class="keyboard-hint"><kbd id="shortcut">Ctrl</kbd> <kbd>↵</kbd></span><button id="compare" class="primary-button">Compare texts <span aria-hidden="true">→</span></button></div>
+          </div>
+        </div>
+        <div class="under-workspace"><p id="message" role="status" aria-live="polite">Ready when you are. Add two files or paste some text.</p><span id="change-count" hidden></span></div>
+      </main>
+
+      <footer class="site-footer"><p><span aria-hidden="true">⌁</span> Your text stays here. No uploads, accounts, or tracking.</p><span>Small tool. Clear differences.</span></footer>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
