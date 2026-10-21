@@ -2,12 +2,14 @@ import './style.css';
 import { compareTexts, normalize, splitLines, validateText, MAX_BYTES } from './compare.js';
 import { createLiveEditors } from './live-editor.js';
 
+/** Find a workspace element by its unique ID. */
 const $ = (id) => document.getElementById(id);
 const sides = ['left', 'right'];
 const names = { left: 'Pasted text', right: 'Pasted text' };
 const loadVersion = { left: 0, right: 0 };
 let comparisonTimer;
 
+/** Set the workspace status text and optional error styling; empty text clears it. */
 function message(text, error = false) {
   $('message').textContent = text;
   $('message').classList.toggle('error', error);
@@ -22,10 +24,12 @@ const editors = createLiveEditors($('editors'), side => {
   message(text, true);
 });
 
+/** Read the complete document from the requested editor pane. */
 function getText(side) {
   return editors.views[side].state.doc.toString();
 }
 
+/** Replace a pane's document with normalized text and move its cursor to the start. */
 function setText(side, text) {
   const view = editors.views[side];
   view.dispatch({
@@ -35,6 +39,7 @@ function setText(side, text) {
   });
 }
 
+/** Refresh a pane's filename, logical line count, and character count. */
 function updateMeta(side) {
   const text = getText(side);
   $(`${side}-meta`).textContent = `${splitLines(text).length.toLocaleString()} lines · ${text.length.toLocaleString()} characters`;
@@ -42,6 +47,7 @@ function updateMeta(side) {
   $(`${side}-name`).title = names[side];
 }
 
+/** Hide stale counts and compare after a 120 ms pause in editing. */
 function scheduleComparison() {
   clearTimeout(comparisonTimer);
   $('change-count').hidden = true;
@@ -49,6 +55,7 @@ function scheduleComparison() {
   comparisonTimer = setTimeout(compare, 120);
 }
 
+/** Refresh highlights, counts, and newline flags, or display a comparison error. */
 function compare() {
   clearTimeout(comparisonTimer);
   try {
@@ -71,6 +78,7 @@ function compare() {
   }
 }
 
+/** Copy complete text, falling back to a temporary textarea for local HTML files. */
 async function copyText(text) {
   try {
     await navigator.clipboard.writeText(text);
@@ -115,6 +123,7 @@ for (const button of document.querySelectorAll('[data-copy]')) {
   });
 }
 
+/** Load validated UTF-8 text, discarding reads superseded by another load or edit. */
 async function loadFile(side, file) {
   if (!file) return;
   const version = ++loadVersion[side];
