@@ -2,6 +2,14 @@
 
 A small, local-first app for comparing two text files. Edit either version and see additions, removals, and changes side by side as you type.
 
+![Diffs comparing harmless example JSON, with additions and removals highlighted side by side](docs/screenshot.png)
+
+## Download
+
+Download **[index.html](https://github.com/KotvicCodes/Diffs/releases/latest/download/index.html)** from the [latest release](https://github.com/KotvicCodes/Diffs/releases/latest), then open it directly in your browser. Everything is bundled into that single file, so no installation, Node.js, server, or internet connection is needed to use it.
+
+The release download is the `dist/index.html` artifact from a passing CI run for the tagged revision. The screenshot above uses the app's built-in **Example** text.
+
 ## Run locally
 
 Requires [Node.js](https://nodejs.org/) 22.12 or later.
