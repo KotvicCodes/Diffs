@@ -1,16 +1,23 @@
 import './style.css';
-import { compareTexts, normalize, splitLines, validateText, MAX_BYTES } from './compare.js';
-import { createLiveEditors } from './live-editor.js';
+import { compareTexts, normalize, splitLines, validateText, MAX_BYTES } from './compare.ts';
+import { createLiveEditors } from './live-editor.ts';
+import { sides, type Side } from './types.ts';
+
+/** Require a workspace element with the expected DOM type. */
+function element<T extends HTMLElement>(selector: string, type: new () => T): T {
+  const node = document.querySelector(selector);
+  if (!(node instanceof type)) throw new Error(`Missing or invalid workspace element: ${selector}`);
+  return node;
+}
 
 /** Find a workspace element by its unique ID. */
-const $ = (id) => document.getElementById(id);
-const sides = ['left', 'right'];
+const $ = (id: string) => element(`#${id}`, HTMLElement);
 const names = { left: 'Pasted text', right: 'Pasted text' };
 const loadVersion = { left: 0, right: 0 };
-let comparisonTimer;
+let comparisonTimer: ReturnType<typeof window.setTimeout> | undefined;
 
 /** Set the workspace status text and optional error styling; empty text clears it. */
-function message(text, error = false) {
+function message(text: string, error = false): void {
   $('message').textContent = text;
   $('message').classList.toggle('error', error);
 }
@@ -25,12 +32,12 @@ const editors = createLiveEditors($('editors'), side => {
 });
 
 /** Read the complete document from the requested editor pane. */
-function getText(side) {
+function getText(side: Side): string {
   return editors.views[side].state.doc.toString();
 }
 
 /** Replace a pane's document with normalized text and move its cursor to the start. */
-function setText(side, text) {
+function setText(side: Side, text: string): void {
   const view = editors.views[side];
   view.dispatch({
     changes: { from: 0, to: view.state.doc.length, insert: normalize(text) },
@@ -40,7 +47,7 @@ function setText(side, text) {
 }
 
 /** Refresh a pane's filename, logical line count, and character count. */
-function updateMeta(side) {
+function updateMeta(side: Side): void {
   const text = getText(side);
   $(`${side}-meta`).textContent = `${splitLines(text).length.toLocaleString()} lines · ${text.length.toLocaleString()} characters`;
   $(`${side}-name`).textContent = names[side];
@@ -52,7 +59,7 @@ function scheduleComparison() {
   clearTimeout(comparisonTimer);
   $('change-count').hidden = true;
   message('');
-  comparisonTimer = setTimeout(compare, 120);
+  comparisonTimer = window.setTimeout(compare, 120);
 }
 
 /** Refresh highlights, counts, and newline flags, or display a comparison error. */
@@ -61,7 +68,7 @@ function compare() {
   try {
     const left = getText('left');
     const right = getText('right');
-    const result = compareTexts(left, right, { ignoreWhitespace: $('ignore-whitespace').checked, timeout: 100 });
+    const result = compareTexts(left, right, { ignoreWhitespace: element('#ignore-whitespace', HTMLInputElement).checked, timeout: 100 });
     editors.updateHighlights(result);
     $('change-count').hidden = !left && !right;
     $('change-count').textContent = result.identical ? 'Identical' : `+${result.added} added  /  −${result.removed} removed`;
@@ -74,12 +81,12 @@ function compare() {
   } catch (error) {
     editors.updateHighlights(null);
     $('change-count').hidden = true;
-    message(error.message, true);
+    message(error instanceof Error ? error.message : String(error), true);
   }
 }
 
 /** Copy complete text, falling back to a temporary textarea for local HTML files. */
-async function copyText(text) {
+async function copyText(text: string): Promise<void> {
   try {
     await navigator.clipboard.writeText(text);
     return;
@@ -97,21 +104,23 @@ async function copyText(text) {
     if (!document.execCommand('copy')) throw new Error('Clipboard unavailable');
   } finally {
     buffer.remove();
-    focused?.focus({ preventScroll: true });
+    if (focused instanceof HTMLElement) focused.focus({ preventScroll: true });
   }
 }
 
-for (const button of document.querySelectorAll('[data-copy]')) {
-  const label = button.getAttribute('aria-label');
-  let resetTimer;
+for (const button of document.querySelectorAll<HTMLButtonElement>('button[data-copy]')) {
+  const label = button.getAttribute('aria-label') ?? 'Copy text';
+  const side = button.dataset.copy;
+  if (side !== 'left' && side !== 'right') throw new Error('Invalid copy button side');
+  let resetTimer: ReturnType<typeof window.setTimeout> | undefined;
   button.addEventListener('click', async () => {
     button.disabled = true;
     try {
-      await copyText(getText(button.dataset.copy));
+      await copyText(getText(side));
       clearTimeout(resetTimer);
       button.textContent = 'Copied';
       button.setAttribute('aria-label', label.replace('Copy', 'Copied'));
-      resetTimer = setTimeout(() => {
+      resetTimer = window.setTimeout(() => {
         button.textContent = 'Copy';
         button.setAttribute('aria-label', label);
       }, 1500);
@@ -124,14 +133,14 @@ for (const button of document.querySelectorAll('[data-copy]')) {
 }
 
 /** Load validated UTF-8 text, discarding reads superseded by another load or edit. */
-async function loadFile(side, file) {
+async function loadFile(side: Side, file: File | undefined): Promise<void> {
   if (!file) return;
   const version = ++loadVersion[side];
   try {
     if (file.size > MAX_BYTES) throw new Error('Please use text files smaller than 1 MB each.');
     const buffer = await file.arrayBuffer();
     if (loadVersion[side] !== version) return;
-    let text;
+    let text: string;
     try { text = new TextDecoder('utf-8', { fatal: true }).decode(buffer); }
     catch { throw new Error('Could not read this as UTF-8 text. Please choose a UTF-8 text file.'); }
     validateText(text);
@@ -140,42 +149,42 @@ async function loadFile(side, file) {
     updateMeta(side);
     compare();
   } catch (error) {
-    if (loadVersion[side] === version) message(error.message, true);
+    if (loadVersion[side] === version) message(error instanceof Error ? error.message : String(error), true);
   }
 }
 
 for (const side of sides) {
-  const input = $(`${side}-file`);
-  document.querySelector(`[data-open="${side}"]`).addEventListener('click', () => input.click());
-  input.addEventListener('change', () => { loadFile(side, input.files[0]); input.value = ''; });
-  const header = document.querySelector(`[data-side="${side}"]`);
+  const input = element(`#${side}-file`, HTMLInputElement);
+  element(`[data-open="${side}"]`, HTMLButtonElement).addEventListener('click', () => input.click());
+  input.addEventListener('change', () => { void loadFile(side, input.files?.[0]); input.value = ''; });
+  const header = element(`[data-side="${side}"]`, HTMLElement);
   const editor = editors.views[side].dom;
   for (const target of [header, editor]) {
     target.addEventListener('dragover', event => {
-      if (!event.dataTransfer.types.includes('Files')) return;
+      if (!event.dataTransfer?.types.includes('Files')) return;
       event.preventDefault();
       header.classList.add('drag-over');
       editor.classList.add('drag-over');
     });
     target.addEventListener('dragleave', event => {
-      if (target.contains(event.relatedTarget)) return;
+      if (event.relatedTarget instanceof Node && target.contains(event.relatedTarget)) return;
       header.classList.remove('drag-over');
       editor.classList.remove('drag-over');
     });
     target.addEventListener('drop', event => {
-      if (!event.dataTransfer.files.length) return;
+      if (!event.dataTransfer?.files.length) return;
       event.preventDefault();
       event.stopPropagation();
       header.classList.remove('drag-over');
       editor.classList.remove('drag-over');
       if (event.dataTransfer.files.length !== 1) { message('Drop one file into each panel.', true); return; }
-      loadFile(side, event.dataTransfer.files[0]);
+      void loadFile(side, event.dataTransfer.files[0]);
     }, true);
   }
 }
 
 $('ignore-whitespace').addEventListener('change', compare);
-$('wrap').addEventListener('change', () => editors.setWrap($('wrap').checked));
+$('wrap').addEventListener('change', () => editors.setWrap(element('#wrap', HTMLInputElement).checked));
 $('swap').addEventListener('click', () => {
   const left = getText('left');
   const right = getText('right');

@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { compareTexts, inlineChanges, validateText, MAX_BYTES, MAX_LINES } from '../src/compare.js';
+import { compareTexts, inlineChanges, validateText, MAX_BYTES, MAX_LINES } from '../src/compare.ts';
 
 test('empty and identical files have no differences', () => {
   assert.deepEqual(compareTexts('', '').rows, []);
   const result = compareTexts('hello\nworld\n', 'hello\nworld\n');
   assert.equal(result.identical, true);
   assert.equal(result.rows.length, 2);
-  assert.deepEqual(result.rows.map(row => [row.left.number, row.right.number]), [[1, 1], [2, 2]]);
+  assert.deepEqual(result.rows.map(row => [row.left?.number, row.right?.number]), [[1, 1], [2, 2]]);
 });
 
 test('aligns replacements, extra inserted lines, and subsequent line numbers', () => {
@@ -45,17 +45,17 @@ test('detects final-newline changes without rendering phantom lines', () => {
 test('ignoring whitespace preserves the original display on both sides', () => {
   const result = compareTexts('  hello  \nbye\n', 'hello\n bye \n', { ignoreWhitespace: true });
   assert.equal(result.identical, true);
-  assert.equal(result.rows[0].left.text, '  hello  ');
-  assert.equal(result.rows[0].right.text, 'hello');
-  assert.equal(result.rows[1].right.text, ' bye ');
+  assert.equal(result.rows[0].left?.text, '  hello  ');
+  assert.equal(result.rows[0].right?.text, 'hello');
+  assert.equal(result.rows[1].right?.text, ' bye ');
   assert.equal(compareTexts('  hello\n', 'hello\n').identical, false);
 });
 
 test('keeps Unicode and HTML as literal text', () => {
   const result = compareTexts('😀 café\n<script>bad()</script>', '😀 čaj\n<script>bad()</script>');
-  assert.equal(result.rows[1].left.text, '<script>bad()</script>');
-  assert.equal(result.rows[0].right.text, '😀 čaj');
-  assert.ok(inlineChanges('café', 'čaj').some(part => part.added));
+  assert.equal(result.rows[1].left?.text, '<script>bad()</script>');
+  assert.equal(result.rows[0].right?.text, '😀 čaj');
+  assert.ok(inlineChanges('café', 'čaj')?.some(part => part.added));
 });
 
 test('rejects binary input, excessive bytes, and excessive line counts', () => {
@@ -75,8 +75,8 @@ test('comparison row stream reconstructs both original inputs', () => {
     const left = createText();
     const right = createText();
     const { rows } = compareTexts(left, right);
-    for (const [side, source] of [['left', left], ['right', right]]) {
-      const cells = rows.map(row => row[side]).filter(Boolean);
+    for (const [side, source] of [['left', left], ['right', right]] as const) {
+      const cells = rows.map(row => row[side]).filter(cell => cell !== null);
       assert.equal(cells.map(cell => cell.text + '\n').join(''), source);
       assert.deepEqual(cells.map(cell => cell.number), cells.map((_, index) => index + 1));
     }
