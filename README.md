@@ -47,12 +47,13 @@ Use **Copy** in either version's header to copy its full text, **Swap** to rever
 
 ## Development
 
-Vanilla JavaScript, CSS, [CodeMirror](https://codemirror.net/) for editable diff panes, [Vite](https://vite.dev/), and [jsdiff](https://github.com/kpdecker/jsdiff) for line comparisons. No framework or server required.
+TypeScript with strict type checking, CSS, [CodeMirror](https://codemirror.net/) for editable diff panes, [Vite](https://vite.dev/), and [jsdiff](https://github.com/kpdecker/jsdiff) for line comparisons. No framework or server required.
 
 ```sh
-npm test          # Comparison correctness and input validation
-npm run build    # Single-file production build
-npm run preview  # Serve the production build locally (optional)
+npm run typecheck # Check app, tests, and Vite configuration
+npm test          # Comparison correctness and input validation (via tsx)
+npm run build     # Type checking and single-file production build
+npm run preview   # Serve the production build locally (optional)
 ```
 
 ## License

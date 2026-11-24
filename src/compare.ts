@@ -1,15 +1,41 @@
-import { diffLines, diffChars } from 'diff';
+import { diffLines, diffChars, type Change } from 'diff';
+
+export interface CompareOptions {
+  ignoreWhitespace?: boolean;
+  /** Time limit in milliseconds. */
+  timeout?: number;
+}
+
+export interface DiffCell {
+  number: number;
+  text: string;
+  kind: 'equal' | 'added' | 'removed';
+}
+
+export interface DiffRow {
+  left: DiffCell | null;
+  right: DiffCell | null;
+}
+
+export interface ComparisonResult {
+  rows: DiffRow[];
+  added: number;
+  removed: number;
+  identical: boolean;
+  leftMissingNewline: boolean;
+  rightMissingNewline: boolean;
+}
 
 export const MAX_BYTES = 1024 * 1024;
 export const MAX_LINES = 10000;
 
 /** Normalize CRLF and lone CR line endings to LF. */
-export function normalize(text) {
+export function normalize(text: string): string {
   return text.replace(/\r\n?/g, '\n');
 }
 
 /** Split text into logical lines without counting a trailing newline as an empty line. */
-export function splitLines(text) {
+export function splitLines(text: string): string[] {
   if (!text) return [];
   const lines = text.split('\n');
   if (lines.at(-1) === '') lines.pop();
@@ -17,7 +43,7 @@ export function splitLines(text) {
 }
 
 /** Throw if text exceeds the byte or line limits, or contains a binary null byte. */
-export function validateText(text) {
+export function validateText(text: string): void {
   if (new TextEncoder().encode(text).length > MAX_BYTES) {
     throw new Error('Please use text files smaller than 1 MB each.');
   }
@@ -32,11 +58,8 @@ export function validateText(text) {
 /**
  * Compare validated text and return paired rows, change counts, and final-newline flags.
  * Preserve each side's text when ignoring whitespace; throw if the time limit expires.
- * @param {string} original Original document text.
- * @param {string} changed Changed document text.
- * @param {{ignoreWhitespace?: boolean, timeout?: number}} [options] Matching options; timeout is in milliseconds.
  */
-export function compareTexts(original, changed, { ignoreWhitespace = false, timeout = 1500 } = {}) {
+export function compareTexts(original: string, changed: string, { ignoreWhitespace = false, timeout = 1500 }: CompareOptions = {}): ComparisonResult {
   validateText(original);
   validateText(changed);
   const left = normalize(original);
@@ -45,13 +68,13 @@ export function compareTexts(original, changed, { ignoreWhitespace = false, time
   if (!parts) throw new Error('These files are too different to compare quickly. Try smaller sections.');
   const leftLines = splitLines(left);
   const rightLines = splitLines(right);
-  const rows = [];
+  const rows: DiffRow[] = [];
   let leftIndex = 0;
   let rightIndex = 0;
   let added = 0;
   let removed = 0;
   /** Build a diff cell with a one-based line number and the source text. */
-  const cell = (lines, index, kind, text) => ({ number: index + 1, text: text ?? lines[index], kind });
+  const cell = (lines: string[], index: number, kind: DiffCell['kind']): DiffCell => ({ number: index + 1, text: lines[index], kind });
 
   for (let i = 0; i < parts.length; i++) {
     const part = parts[i];
@@ -80,7 +103,7 @@ export function compareTexts(original, changed, { ignoreWhitespace = false, time
 }
 
 /** Return character changes, or null when the length, time, or edit budget is exceeded. */
-export function inlineChanges(left, right) {
+export function inlineChanges(left: string, right: string): Change[] | null {
   if (left.length + right.length > 1000) return null;
   return diffChars(left, right, { timeout: 10, maxEditLength: 120 }) ?? null;
 }

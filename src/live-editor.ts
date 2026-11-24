@@ -1,12 +1,13 @@
-import { Compartment, EditorState, StateEffect, StateField } from '@codemirror/state';
-import { Decoration, drawSelection, EditorView, highlightSpecialChars, keymap, lineNumbers, placeholder } from '@codemirror/view';
+import { Compartment, EditorState, StateEffect, StateField, type Extension, type Range } from '@codemirror/state';
+import { Decoration, drawSelection, EditorView, highlightSpecialChars, keymap, lineNumbers, placeholder, type DecorationSet } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
 import { search, searchKeymap } from '@codemirror/search';
 import { MergeView } from '@codemirror/merge';
-import { inlineChanges, validateText } from './compare.js';
+import { inlineChanges, validateText, type ComparisonResult } from './compare.ts';
+import { sides, type Side } from './types.ts';
 
-const setHighlights = StateEffect.define();
-const highlights = StateField.define({
+const setHighlights = StateEffect.define<DecorationSet>();
+const highlights = StateField.define<DecorationSet>({
   create: () => Decoration.none,
   /** Map highlights through edits, replacing them when a comparison effect arrives. */
   update(value, transaction) {
@@ -17,17 +18,11 @@ const highlights = StateField.define({
   provide: field => EditorView.decorations.from(field),
 });
 
-/**
- * Mount two aligned, editable documents with validation and custom diff highlights.
- * @param {HTMLElement} parent Container for the merge editor.
- * @param {(side: 'left' | 'right') => void} onChange Called after a document changes.
- * @param {(message: string) => void} onError Reports rejected edits.
- * @returns {{views: {left: EditorView, right: EditorView}, updateHighlights: Function, setWrap: Function}} Editor views and display controls.
- */
-export function createLiveEditors(parent, onChange, onError) {
+/** Mount two aligned, editable documents with validation and custom diff highlights. */
+export function createLiveEditors(parent: HTMLElement, onChange: (side: Side) => void, onError: (message: string) => void) {
   const wrapping = { left: new Compartment(), right: new Compartment() };
   /** Configure one pane's input, history, accessibility, validation, and wrapping. */
-  const extensions = (side, label) => [
+  const extensions = (side: Side, label: string): Extension[] => [
     lineNumbers(), highlightSpecialChars(), drawSelection(), history(), search({ top: true }),
     keymap.of([...defaultKeymap, ...historyKeymap, ...searchKeymap, indentWithTab]),
     EditorState.tabSize.of(2),
@@ -37,7 +32,7 @@ export function createLiveEditors(parent, onChange, onError) {
     EditorState.transactionFilter.of(transaction => {
       if (transaction.docChanged) {
         try { validateText(transaction.newDoc.toString()); }
-        catch (error) { onError(error.message); return []; }
+        catch (error) { onError(error instanceof Error ? error.message : String(error)); return []; }
       }
       return transaction;
     }),
@@ -60,14 +55,14 @@ export function createLiveEditors(parent, onChange, onError) {
   const views = { left: merge.a, right: merge.b };
 
   /** Apply line and budget-limited character highlights; null clears both panes. */
-  function updateHighlights(result) {
-    const decorations = { left: [], right: [] };
+  function updateHighlights(result: ComparisonResult | null): void {
+    const decorations: Record<Side, Range<Decoration>[]> = { left: [], right: [] };
     let inlineBudget = 200;
     const inlineDeadline = performance.now() + 30;
     for (const row of result?.rows ?? []) {
       const parts = row.left?.kind === 'removed' && row.right?.kind === 'added' && inlineBudget-- > 0 && performance.now() < inlineDeadline
         ? inlineChanges(row.left.text, row.right.text) : null;
-      for (const side of ['left', 'right']) {
+      for (const side of sides) {
         const cell = row[side];
         if (!cell || cell.kind === 'equal') continue;
         const line = views[side].state.doc.line(cell.number);
@@ -83,14 +78,14 @@ export function createLiveEditors(parent, onChange, onError) {
         }
       }
     }
-    for (const side of ['left', 'right']) {
+    for (const side of sides) {
       views[side].dispatch({ effects: setHighlights.of(Decoration.set(decorations[side], true)) });
     }
   }
 
   /** Toggle wrapping in both panes without replacing their documents or history. */
-  function setWrap(enabled) {
-    for (const side of ['left', 'right']) {
+  function setWrap(enabled: boolean): void {
+    for (const side of sides) {
       views[side].dispatch({ effects: wrapping[side].reconfigure(enabled ? EditorView.lineWrapping : []) });
     }
   }
